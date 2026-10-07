@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPIIZ | Sistema TT - Registro de Alumno</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #6A1C32;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container-card {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .left-content {
+            flex: 1;
+            background: #4A1322;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .left-content img {
+            width: 350px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
+        }
+
+        .left-content h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .left-content p {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .form-box {
+            flex: 1;
+            padding: 40px;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-box::before {
+            content: "";
+            background-image: url('/imagenes/Escudo_ipn.png');
+            background-size: 50%;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.08;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .form-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        /* Estilos unificados para inputs de texto y selectores */
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            background-color: #fafafa;
+            font-family: inherit;
+            font-size: 1rem;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #6A1C32;
+            background-color: #ffffff;
+            box-shadow: 0 0 5px rgba(106, 28, 50, 0.3);
+            outline: none;
+        }
+
+        /* Elimina el estilo nativo de tu PC/Mac para ponerle el estilo personalizado */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 12px auto;
+            padding-right: 35px;
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 10px;
+            padding: 14px;
+            background: #6A1C32;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background: #4A1322;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a {
+            color: #6A1C32;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Contenedor del campo Contraseña y el botón "Ojito" */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+            width: 100%;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password:hover {
+            color: #6A1C32;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-card">
+    <div class="left-content">
+        <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
+        <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
+        <p>Sistema de Gestión de Trabajos Terminales</p>
+    </div>
+
+    <div class="form-box">
+        <div class="form-wrapper">
+            <h2 style="text-align: center; color: #6A1C32; margin-bottom: 20px;">Registro de Alumno</h2>
+
+            <form id="formRegistro">
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" placeholder="Ingresa tu nombre completo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="boleta">Boleta:</label>
+                    <input type="text" id="boleta" placeholder="Ej: 2024670156" required
+                           maxlength="10"
+                           pattern="\d{10}"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           title="Debe contener exactamente 10 dígitos numéricos">
+                </div>
+
+                <div class="form-group">
+                    <label for="carrera">Programa Académico:</label>
+                    <select id="carrera" required>
+                        <option value="" disabled selected>Selecciona tu carrera...</option>
+                        <option value="Sistemas Computacionales">Ing. en Sistemas Computacionales</option>
+                        <option value="Mecatrónica">Ing. Mecatrónica</option>
+                        <option value="Alimentos">Ing. en Alimentos</option>
+                        <option value="Ambiental">Ing. Ambiental</option>
+                        <option value="Metalúrgica">Ing. Metalúrgica</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="correo">Correo Institucional:</label>
+                    <input type="email" id="correo" placeholder="ejemplo@alumno.ipn.mx" required
+                           pattern="^[a-zA-Z0-9._%+-]+@alumno\.ipn\.mx$"
+                           title="Debe ser un correo institucional con terminación @alumno.ipn.mx">
+                </div>
+
+                <div class="form-group">
+                    <label for="contrasena">Contraseña:</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="contrasena" placeholder="Crea tu contraseña" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('contrasena', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit">Crear Cuenta</button>
+            </form>
+
+            <div class="footer-links">
+                <a th:href="@{/login}">¿Ya tienes cuenta? Inicia sesión aquí</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/plugins/jquery/jquery.min.js}"></script>
+<script th:src="@{/dist/js/js_propios/registro.js}"></script>
+
+<!-- Script Exclusivo para el Ojito de la Contraseña -->
+<script>
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const eyeSlash = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+        const eyeOpen = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = eyeSlash;
+        } else {
+            input.type = 'password';
+            btn.innerHTML = eyeOpen;
+        }
+    }
+</script>
+</body>
+</html>

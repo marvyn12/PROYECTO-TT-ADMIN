@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPIIZ | Nueva Contraseña</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #6A1C32;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container-card {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .left-content {
+            flex: 1;
+            background: #4A1322;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .left-content img {
+            width: 350px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
+        }
+
+        .left-content h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .left-content p {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .form-box {
+            flex: 1;
+            padding: 40px;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-box::before {
+            content: "";
+            background-image: url('/imagenes/Escudo_ipn.png');
+            background-size: 50%;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.08;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .form-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 18px;
+        }
+
+        label {
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            background-color: #fafafa;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        input:focus {
+            border-color: #6A1C32;
+            background-color: #ffffff;
+            box-shadow: 0 0 5px rgba(106, 28, 50, 0.3);
+            outline: none;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 10px;
+            padding: 14px;
+            background: #6A1C32;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background: #4A1322;
+        }
+
+        /* Estilos para el contenedor de la contraseña y el ojito */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+            width: 100%;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password:hover {
+            color: #6A1C32;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-card">
+    <div class="left-content">
+        <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
+        <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
+        <p>Sistema de Gestión de Trabajos Terminales</p>
+    </div>
+
+    <div class="form-box">
+        <div class="form-wrapper">
+            <h2 style="text-align: center; color: #6A1C32; margin-bottom: 25px;">Crear Nueva Contraseña</h2>
+
+            <!-- Aquí Thymeleaf inyecta el token oculto que viene de la URL -->
+            <input type="hidden" id="token" th:value="${token}">
+
+            <form id="formRestablecer">
+                <div class="form-group">
+                    <label for="nuevaContrasena">Nueva Contraseña:</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="nuevaContrasena" placeholder="Escribe tu nueva contraseña" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('nuevaContrasena', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit">Actualizar Contraseña</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script Exclusivo para el Ojito de la Contraseña y la petición AJAX -->
+<script>
+    document.getElementById('formRestablecer').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const token = document.getElementById('token').value;
+        const nuevaContrasena = document.getElementById('nuevaContrasena').value;
+
+        fetch('/api/auth/restablecer-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, nuevaContrasena })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Actualizada!',
+                        text: data.mensaje,
+                        confirmButtonColor: '#6A1C32'
+                    }).then(() => {
+                        window.location.href = '/login'; // Lo mandamos de vuelta al login
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.mensaje,
+                        confirmButtonColor: '#6A1C32'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de servidor',
+                    text: 'Hubo un problema al procesar tu solicitud.',
+                    confirmButtonColor: '#6A1C32'
+                });
+            });
+    });
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const eyeSlash = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+        const eyeOpen = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = eyeSlash;
+        } else {
+            input.type = 'password';
+            btn.innerHTML = eyeOpen;
+        }
+    }
+</script>
+</body>
+</html>

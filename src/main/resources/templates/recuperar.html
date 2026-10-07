@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPIIZ | Recuperar Contraseña</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #6A1C32;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container-card {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .left-content {
+            flex: 1;
+            background: #4A1322;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .left-content img {
+            width: 350px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
+        }
+
+        .left-content h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .form-box {
+            flex: 1;
+            padding: 40px;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-box::before {
+            content: "";
+            background-image: url('/imagenes/Escudo_ipn.png');
+            background-size: 50%;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.08;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .form-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 18px;
+        }
+
+        label {
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            background-color: #fafafa;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        input:focus {
+            border-color: #6A1C32;
+            background-color: #ffffff;
+            box-shadow: 0 0 5px rgba(106, 28, 50, 0.3);
+            outline: none;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 10px;
+            padding: 14px;
+            background: #6A1C32;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background: #4A1322;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+
+        .footer-links a {
+            color: #6A1C32;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-card">
+    <div class="left-content">
+        <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
+        <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
+        <p>Sistema de Gestión de Trabajos Terminales</p>
+    </div>
+
+    <div class="form-box">
+        <div class="form-wrapper">
+            <h2 style="text-align: center; color: #6A1C32; margin-bottom: 15px;">Recuperar Contraseña</h2>
+            <p style="text-align: center; color: #555; margin-bottom: 25px; line-height: 1.5;">Ingresa tu correo institucional y te enviaremos un enlace de recuperación.</p>
+
+            <form id="formRecuperar">
+                <div class="form-group">
+                    <label for="correo">Correo Institucional:</label>
+                    <input type="email" id="correo" placeholder="ejemplo@alumno.ipn.mx" required>
+                </div>
+
+                <button type="submit" id="btnEnviar">Enviar Enlace</button>
+            </form>
+
+            <div class="footer-links">
+                <a th:href="@{/login}">Volver al Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('formRecuperar').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const correo = document.getElementById('correo').value;
+        const btnEnviar = document.getElementById('btnEnviar');
+
+        // Bloqueamos el botón para evitar doble clic
+        btnEnviar.disabled = true;
+
+        // Lanzamos el modal de "Procesando"
+        Swal.fire({
+            title: 'Procesando...',
+            text: 'Estamos enviando el correo. Esto puede tomar unos segundos.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading(); // Muestra la animación del spinner
+            }
+        });
+
+        // Hacemos la petición al backend
+        fetch('/api/auth/olvide-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correo })
+        })
+            .then(res => res.json())
+            .then(data => {
+                btnEnviar.disabled = false; // Desbloqueamos el botón
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Listo',
+                    text: data.mensaje,
+                    confirmButtonColor: '#6A1C32'
+                });
+            })
+            .catch(err => {
+                btnEnviar.disabled = false; // Desbloqueamos el botón en caso de error
+                console.error('Error:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de red',
+                    text: 'No se pudo conectar con el servidor',
+                    confirmButtonColor: '#6A1C32'
+                });
+            });
+    });
+</script>
+</body>
+</html>
