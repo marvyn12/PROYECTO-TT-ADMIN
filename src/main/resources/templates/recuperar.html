@@ -17,15 +17,53 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* --- ANIMACIONES OPTIMIZADAS --- */
+        @keyframes smoothEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes smoothExit {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+            }
+        }
+
+        /* Contenedor de la sombra */
+        .card-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
+            background-color: #ffffff;
+            /* Entrada elegante y ágil (0.6s) */
+            animation: smoothEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Salida rápida para evitar el "brinco" (0.5s) */
+        .card-wrapper.animating-out {
+            animation: smoothExit 0.5s cubic-bezier(0.32, 0, 0.67, 0) forwards !important;
         }
 
         .container-card {
             display: flex;
             width: 100%;
-            max-width: 1000px;
-            background-color: #ffffff;
+            background-color: transparent;
             border-radius: 12px;
-            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
             overflow: hidden;
             position: relative;
         }
@@ -52,6 +90,12 @@
             font-size: 2.2rem;
             font-weight: 700;
             margin: 0 0 10px 0;
+        }
+
+        .left-content p {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin: 0;
         }
 
         .form-box {
@@ -132,21 +176,17 @@
             background: #4A1322;
         }
 
-        button:disabled {
-            background: #999;
-            cursor: not-allowed;
-        }
-
         .footer-links {
             text-align: center;
             margin-top: 20px;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .footer-links a {
             color: #6A1C32;
             text-decoration: none;
             font-weight: 600;
+            line-height: 2;
         }
 
         .footer-links a:hover {
@@ -156,80 +196,97 @@
 </head>
 <body>
 
-<div class="container-card">
-    <div class="left-content">
-        <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
-        <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
-        <p>Sistema de Gestión de Trabajos Terminales</p>
-    </div>
+<div class="card-wrapper">
+    <div class="container-card">
+        <div class="left-content">
+            <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
+            <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
+            <p>Sistema de Gestión de Trabajos Terminales</p>
+        </div>
 
-    <div class="form-box">
-        <div class="form-wrapper">
-            <h2 style="text-align: center; color: #6A1C32; margin-bottom: 15px;">Recuperar Contraseña</h2>
-            <p style="text-align: center; color: #555; margin-bottom: 25px; line-height: 1.5;">Ingresa tu correo institucional y te enviaremos un enlace de recuperación.</p>
+        <div class="form-box">
+            <div class="form-wrapper">
+                <h2 style="text-align: center; color: #6A1C32; margin-bottom: 10px;">Recuperar Contraseña</h2>
+                <p style="text-align: center; color: #666; font-size: 0.95rem; margin-bottom: 25px;">
+                    Ingresa el correo con el que te registraste y te enviaremos un enlace para restablecer tu acceso.
+                </p>
 
-            <form id="formRecuperar">
-                <div class="form-group">
-                    <label for="correo">Correo Institucional:</label>
-                    <input type="email" id="correo" placeholder="ejemplo@alumno.ipn.mx" required>
+                <form id="formRecuperar">
+                    <div class="form-group">
+                        <label for="correo">Correo Electrónico:</label>
+                        <input type="email" id="correo" placeholder="Ingresa tu correo" required>
+                    </div>
+
+                    <button type="submit" id="btnEnviar">Enviar Instrucciones</button>
+                </form>
+
+                <div class="footer-links">
+                    <a th:href="@{/login}">Regresar al Inicio de Sesión</a>
                 </div>
-
-                <button type="submit" id="btnEnviar">Enviar Enlace</button>
-            </form>
-
-            <div class="footer-links">
-                <a th:href="@{/login}">Volver al Login</a>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // Petición AJAX para enviar el correo
     document.getElementById('formRecuperar').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const correo = document.getElementById('correo').value;
-        const btnEnviar = document.getElementById('btnEnviar');
+        const correo = document.getElementById('correo').value.trim();
+        const btn = document.getElementById('btnEnviar');
 
-        // Bloqueamos el botón para evitar doble clic
-        btnEnviar.disabled = true;
+        // Desactivamos el botón para evitar doble clic
+        btn.disabled = true;
+        btn.innerHTML = 'Enviando...';
 
-        // Lanzamos el modal de "Procesando"
-        Swal.fire({
-            title: 'Procesando...',
-            text: 'Estamos enviando el correo. Esto puede tomar unos segundos.',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading(); // Muestra la animación del spinner
-            }
-        });
-
-        // Hacemos la petición al backend
         fetch('/api/auth/olvide-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ correo })
         })
-            .then(res => res.json())
-            .then(data => {
-                btnEnviar.disabled = false; // Desbloqueamos el botón
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Listo',
-                    text: data.mensaje,
-                    confirmButtonColor: '#6A1C32'
-                });
-            })
-            .catch(err => {
-                btnEnviar.disabled = false; // Desbloqueamos el botón en caso de error
-                console.error('Error:', err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de red',
-                    text: 'No se pudo conectar con el servidor',
-                    confirmButtonColor: '#6A1C32'
-                });
+        .then(res => res.json())
+        .then(data => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Correo enviado!',
+                text: data.mensaje,
+                confirmButtonColor: '#6A1C32'
+            }).then(() => {
+                // Hacemos la animación de salida programada
+                document.querySelector('.card-wrapper').classList.add('animating-out');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 500);
             });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            btn.disabled = false;
+            btn.innerHTML = 'Enviar Instrucciones';
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al procesar tu solicitud.',
+                confirmButtonColor: '#6A1C32'
+            });
+        });
+    });
+
+    // Transición de salida suave para el botón de regresar
+    document.querySelectorAll('.footer-links a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const destino = this.href;
+            const cardWrapper = document.querySelector('.card-wrapper');
+
+            cardWrapper.classList.add('animating-out');
+
+            // El timeout coincide con los 0.5s de la animación smoothExit
+            setTimeout(() => {
+                window.location.href = destino;
+            }, 500);
+        });
     });
 </script>
 </body>

@@ -17,15 +17,55 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            overflow: hidden; /* Evita que salga barra de scroll durante la animación */
         }
 
+        /* --- ANIMACIONES SUAVES Y FLUIDAS (Fade & Slide) --- */
+        @keyframes smoothEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(-40px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes smoothExit {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.98);
+            }
+        }
+
+        /* El contenedor principal de toda la tarjeta */
+        .card-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
+            background-color: #ffffff;
+            /* Animación de entrada fluida de 1 segundo */
+            animation: smoothEnter 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Clase para la salida */
+        .card-wrapper.animating-out {
+            /* Animación de salida fluida */
+            animation: smoothExit 0.8s cubic-bezier(0.32, 0, 0.67, 0) forwards !important;
+        }
+
+        /* Contenedor interno sin animación (para que no haga doble efecto) */
         .container-card {
             display: flex;
             width: 100%;
-            max-width: 1000px;
-            background-color: #ffffff;
+            background-color: transparent;
             border-radius: 12px;
-            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
             overflow: hidden;
             position: relative;
         }
@@ -172,36 +212,38 @@
 </head>
 <body>
 
-<div class="container-card">
-    <div class="left-content">
-        <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
-        <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
-        <p>Sistema de Gestión de Trabajos Terminales</p>
-    </div>
+<div class="card-wrapper">
+    <div class="container-card">
+        <div class="left-content">
+            <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
+            <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
+            <p>Sistema de Gestión de Trabajos Terminales</p>
+        </div>
 
-    <div class="form-box">
-        <div class="form-wrapper">
-            <h2 style="text-align: center; color: #6A1C32; margin-bottom: 25px;">Crear Nueva Contraseña</h2>
+        <div class="form-box">
+            <div class="form-wrapper">
+                <h2 style="text-align: center; color: #6A1C32; margin-bottom: 25px;">Crear Nueva Contraseña</h2>
 
-            <!-- Aquí Thymeleaf inyecta el token oculto que viene de la URL -->
-            <input type="hidden" id="token" th:value="${token}">
+                <!-- Aquí Thymeleaf inyecta el token oculto que viene de la URL -->
+                <input type="hidden" id="token" th:value="${token}">
 
-            <form id="formRestablecer">
-                <div class="form-group">
-                    <label for="nuevaContrasena">Nueva Contraseña:</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="nuevaContrasena" placeholder="Escribe tu nueva contraseña" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword('nuevaContrasena', this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
+                <form id="formRestablecer">
+                    <div class="form-group">
+                        <label for="nuevaContrasena">Nueva Contraseña:</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="nuevaContrasena" placeholder="Escribe tu nueva contraseña" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('nuevaContrasena', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <button type="submit">Actualizar Contraseña</button>
-            </form>
+                    <button type="submit">Actualizar Contraseña</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -228,7 +270,13 @@
                         text: data.mensaje,
                         confirmButtonColor: '#6A1C32'
                     }).then(() => {
-                        window.location.href = '/login'; // Lo mandamos de vuelta al login
+                        // Activamos la animación de salida de forma programática después de cerrar la alerta
+                        const cardWrapper = document.querySelector('.card-wrapper');
+                        cardWrapper.classList.add('animating-out');
+
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 800);
                     });
                 } else {
                     Swal.fire({

@@ -28,15 +28,12 @@ public class AuthController {
 
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
-            // Generamos un token aleatorio único
             String token = java.util.UUID.randomUUID().toString();
             usuario.setTokenPassword(token);
             usuarioRepository.save(usuario);
 
-            // Enviamos el correo
             correoService.enviarCorreoRecuperacion(correo, token);
         }
-        // Siempre decimos que "se envió", por seguridad (para que no adivinen correos)
         return ResponseEntity.ok(Map.of("success", true, "mensaje", "Si el correo existe, se han enviado las instrucciones."));
     }
 
@@ -50,10 +47,9 @@ public class AuthController {
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
             usuario.setContrasena(nuevaContrasena);
-            usuario.setTokenPassword(null); // Borramos el token para que ya no sirva
+            usuario.setTokenPassword(null);
             usuarioRepository.save(usuario);
 
-            // ¡AQUÍ ESTÁ LA MAGIA! Matamos cualquier sesión que se haya quedado pegada
             session.invalidate();
 
             return ResponseEntity.ok(Map.of("success", true, "mensaje", "Contraseña actualizada correctamente."));
@@ -85,20 +81,52 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate(); // Destruye la sesión
+        session.invalidate();
         return ResponseEntity.ok(Map.of("success", true));
     }
 
     @PostMapping("/registro")
-    public ResponseEntity<?> registrarAlumno(@RequestBody Usuario nuevoUsuario) {
-        // Validar si el correo o boleta ya existen
-        if (usuarioRepository.findByCorreo(nuevoUsuario.getCorreo()).isPresent() ||
-                usuarioRepository.findByBoleta(nuevoUsuario.getBoleta()).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "mensaje", "El correo o la boleta ya están registrados."));
+    public ResponseEntity<?> registrarUsuario(@RequestBody Usuario nuevoUsuario) {
+        // 1. Validar que el correo no exista
+        if (usuarioRepository.findByCorreo(nuevoUsuario.getCorreo()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "mensaje", "El correo ya está registrado."));
         }
 
-        // Forzar rol ALUMNO
-        nuevoUsuario.setRol("ALUMNO");
+        // 2. Limpieza y validación por Rol
+        String rol = nuevoUsuario.getRol();
+
+        if ("ALUMNO".equals(rol)) {
+            // Validar que la boleta no se duplique
+            if (nuevoUsuario.getBoleta() != null && !nuevoUsuario.getBoleta().isEmpty()) {
+                if (usuarioRepository.findByBoleta(nuevoUsuario.getBoleta()).isPresent()) {
+                    return ResponseEntity.badRequest().body(Map.of("success", false, "mensaje", "La boleta ya está registrada."));
+                }
+            }
+            // Alumnos no tienen número de empleado
+            nuevoUsuario.setNumeroEmpleado(null);
+
+        } else if ("DOCENTE".equals(rol) || "EXTERNO".equals(rol)) {
+            // Docentes y Externos no tienen boleta ni carrera
+            nuevoUsuario.setBoleta(null);
+            nuevoUsuario.setCarrera(null);
+
+            if ("EXTERNO".equals(rol)) {
+                // Externos tampoco tienen número de empleado
+                nuevoUsuario.setNumeroEmpleado(null);
+            }
+        } else {
+            // Evitar inyección de roles extraños desde el front-end
+            return ResponseEntity.badRequest().body(Map.of("success", false, "mensaje", "Rol no válido."));
+        }
+
+        // 3. Asignación automática de ADMIN al profesor designado
+        if ("hacunac@ipn.mx".equals(nuevoUsuario.getCorreo())) {
+            nuevoUsuario.setRol("ADMIN");
+        } else {
+            nuevoUsuario.setRol(rol);
+        }
+
+        // 4. Guardar usuario
         usuarioRepository.save(nuevoUsuario);
 
         return ResponseEntity.ok(Map.of("success", true, "mensaje", "Registro exitoso. Ya puedes iniciar sesión."));

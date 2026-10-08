@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPIIZ | Sistema TT - Registro de Alumno</title>
+    <title>UPIIZ | Sistema TT - Registro de Usuario</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -17,17 +17,80 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            overflow: hidden; /* Evita barras de scroll raras */
+        }
+
+        /* --- ANIMACIONES SUAVES Y FLUIDAS (Fade & Slide) PARA LA TARJETA --- */
+        @keyframes smoothEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes smoothExit {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+            }
+        }
+
+        /* El contenedor de afuera (Mantiene la estela blanca) */
+        .card-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
+            background-color: #ffffff;
+            animation: smoothEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Clase para la salida rápida y sin brinco */
+        .card-wrapper.animating-out {
+            animation: smoothExit 0.5s cubic-bezier(0.32, 0, 0.67, 0) forwards !important;
         }
 
         .container-card {
             display: flex;
             width: 100%;
-            max-width: 1000px;
-            background-color: #ffffff;
+            background-color: transparent;
             border-radius: 12px;
-            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
             overflow: hidden;
             position: relative;
+        }
+
+        /* --- TRANSICIÓN SUAVE TIPO ACORDEÓN PARA LOS CAMPOS (IDA Y VUELTA LENTA) --- */
+        .campo-dinamico {
+            max-height: 0; /* Empieza colapsado */
+            opacity: 0;
+            transform: translateX(-40px); /* Empieza un poco a la izquierda */
+            overflow: hidden;
+            /* La transición controla tanto el crecimiento (aparecer) como el encogimiento (desaparecer) */
+            /* Le puse 0.8s para que se vea bien lento y fluido */
+            transition: max-height 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Cuando el JS le agrega esta clase, el contenedor crece y se muestra suavemente */
+        .campo-dinamico.mostrar {
+            max-height: 300px; /* Espacio suficiente para los inputs */
+            opacity: 1;
+            transform: translateX(0); /* Regresa a su posición original */
+        }
+
+        /* Envoltura interna para que el padding no rompa la animación */
+        .contenido-interno {
+            padding-top: 5px;
+            padding-bottom: 5px;
         }
 
         .left-content {
@@ -101,7 +164,6 @@
             font-size: 0.9rem;
         }
 
-        /* Estilos unificados para inputs de texto y selectores */
         input, select {
             width: 100%;
             box-sizing: border-box;
@@ -122,7 +184,6 @@
             outline: none;
         }
 
-        /* Elimina el estilo nativo de tu PC/Mac para ponerle el estilo personalizado */
         select {
             appearance: none;
             -webkit-appearance: none;
@@ -169,7 +230,6 @@
             text-decoration: underline;
         }
 
-        /* Contenedor del campo Contraseña y el botón "Ojito" */
         .password-wrapper {
             position: relative;
             display: flex;
@@ -203,69 +263,95 @@
 </head>
 <body>
 
-<div class="container-card">
-    <div class="left-content">
-        <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
-        <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
-        <p>Sistema de Gestión de Trabajos Terminales</p>
-    </div>
+<div class="card-wrapper">
+    <div class="container-card">
+        <div class="left-content">
+            <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
+            <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
+            <p>Sistema de Gestión de Trabajos Terminales</p>
+        </div>
 
-    <div class="form-box">
-        <div class="form-wrapper">
-            <h2 style="text-align: center; color: #6A1C32; margin-bottom: 20px;">Registro de Alumno</h2>
+        <div class="form-box">
+            <div class="form-wrapper">
+                <h2 style="text-align: center; color: #6A1C32; margin-bottom: 20px;">Registro de Usuario</h2>
 
-            <form id="formRegistro">
-                <div class="form-group">
-                    <label for="nombre">Nombre Completo:</label>
-                    <input type="text" id="nombre" placeholder="Ingresa tu nombre completo" required>
-                </div>
+                <form id="formRegistro">
 
-                <div class="form-group">
-                    <label for="boleta">Boleta:</label>
-                    <input type="text" id="boleta" placeholder="Ej: 2024670156" required
-                           maxlength="10"
-                           pattern="\d{10}"
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                           title="Debe contener exactamente 10 dígitos numéricos">
-                </div>
-
-                <div class="form-group">
-                    <label for="carrera">Programa Académico:</label>
-                    <select id="carrera" required>
-                        <option value="" disabled selected>Selecciona tu carrera...</option>
-                        <option value="Sistemas Computacionales">Ing. en Sistemas Computacionales</option>
-                        <option value="Mecatrónica">Ing. Mecatrónica</option>
-                        <option value="Alimentos">Ing. en Alimentos</option>
-                        <option value="Ambiental">Ing. Ambiental</option>
-                        <option value="Metalúrgica">Ing. Metalúrgica</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="correo">Correo Institucional:</label>
-                    <input type="email" id="correo" placeholder="ejemplo@alumno.ipn.mx" required
-                           pattern="^[a-zA-Z0-9._%+-]+@alumno\.ipn\.mx$"
-                           title="Debe ser un correo institucional con terminación @alumno.ipn.mx">
-                </div>
-
-                <div class="form-group">
-                    <label for="contrasena">Contraseña:</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="contrasena" placeholder="Crea tu contraseña" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword('contrasena', this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
+                    <div class="form-group">
+                        <label for="tipoUsuario">Tipo de Usuario:</label>
+                        <select id="tipoUsuario" name="rol" required onchange="toggleCampos(this.value)">
+                            <option value="" disabled selected>¿Qué tipo de usuario eres?</option>
+                            <option value="ALUMNO">Alumno</option>
+                            <option value="DOCENTE">Docente (IPN)</option>
+                            <option value="EXTERNO">Asesor Externo</option>
+                        </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="nombre">Nombre Completo:</label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre completo" required>
+                    </div>
+
+                    <!-- Contenedor exclusivo para ALUMNOS con clase campo-dinamico -->
+                    <div id="divAlumno" class="campo-dinamico">
+                        <div class="contenido-interno">
+                            <div class="form-group">
+                                <label for="boleta">Boleta:</label>
+                                <input type="text" id="boleta" name="boleta" placeholder="Ej: 2024670156"
+                                       maxlength="10"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carrera">Programa Académico:</label>
+                                <select id="carrera" name="carrera">
+                                    <option value="" disabled selected>Selecciona tu carrera...</option>
+                                    <option value="Sistemas Computacionales">Ing. en Sistemas Computacionales</option>
+                                    <option value="Mecatrónica">Ing. Mecatrónica</option>
+                                    <option value="Alimentos">Ing. en Alimentos</option>
+                                    <option value="Ambiental">Ing. Ambiental</option>
+                                    <option value="Metalúrgica">Ing. Metalúrgica</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor exclusivo para DOCENTES con clase campo-dinamico -->
+                    <div id="divDocente" class="campo-dinamico">
+                        <div class="contenido-interno">
+                            <div class="form-group">
+                                <label for="numeroEmpleado">Número de Empleado (Opcional):</label>
+                                <input type="text" id="numeroEmpleado" name="numeroEmpleado" placeholder="Ej: 123456"
+                                       maxlength="10"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="correo">Correo Electrónico:</label>
+                        <input type="email" id="correo" name="correo" placeholder="Selecciona un rol primero..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contrasena">Contraseña:</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="contrasena" name="contrasena" placeholder="Crea tu contraseña" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('contrasena', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit">Crear Cuenta</button>
+                </form>
+
+                <div class="footer-links">
+                    <a th:href="@{/login}">¿Ya tienes cuenta? Inicia sesión aquí</a>
                 </div>
-
-                <button type="submit">Crear Cuenta</button>
-            </form>
-
-            <div class="footer-links">
-                <a th:href="@{/login}">¿Ya tienes cuenta? Inicia sesión aquí</a>
             </div>
         </div>
     </div>
@@ -274,8 +360,31 @@
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
 <script th:src="@{/dist/js/js_propios/registro.js}"></script>
 
-<!-- Script Exclusivo para el Ojito de la Contraseña -->
 <script>
+    // ESTA FUNCIÓN FUE LA QUE CORREGÍ PARA USAR CLASES EN VEZ DE DISPLAY: NONE
+    function toggleCampos(tipo) {
+        const divAlumno = document.getElementById('divAlumno');
+        const divDocente = document.getElementById('divDocente');
+        const inputCorreo = document.getElementById('correo');
+
+        // Quitamos la clase 'mostrar' a ambos para que se contraigan suavemente
+        divAlumno.classList.remove('mostrar');
+        divDocente.classList.remove('mostrar');
+
+        // Agregamos la clase 'mostrar' al que corresponda
+        if (tipo === 'ALUMNO') {
+            divAlumno.classList.add('mostrar');
+            inputCorreo.placeholder = "ej: juan@alumno.ipn.mx";
+
+        } else if (tipo === 'DOCENTE') {
+            divDocente.classList.add('mostrar');
+            inputCorreo.placeholder = "ej: profe@ipn.mx";
+
+        } else if (tipo === 'EXTERNO') {
+            inputCorreo.placeholder = "ej: asesor@gmail.com";
+        }
+    }
+
     function togglePassword(inputId, btn) {
         const input = document.getElementById(inputId);
         const eyeSlash = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
@@ -289,6 +398,23 @@
             btn.innerHTML = eyeOpen;
         }
     }
+
+    // Transición de salida suave para los enlaces del footer
+    document.querySelectorAll('.footer-links a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const destino = this.href;
+            const cardWrapper = document.querySelector('.card-wrapper');
+
+            // Agrega la clase que desaparece la tarjeta hacia abajo
+            cardWrapper.classList.add('animating-out');
+
+            // Esperamos los mismos 500ms de la animación smoothExit
+            setTimeout(() => {
+                window.location.href = destino;
+            }, 500);
+        });
+    });
 </script>
 </body>
 </html>

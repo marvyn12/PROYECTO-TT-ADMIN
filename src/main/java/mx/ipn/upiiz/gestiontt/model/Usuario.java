@@ -21,8 +21,13 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String boleta; // O número de empleado si es profe
+    // Quitamos el nullable = false porque Docentes y Externos no tendrán boleta
+    @Column(unique = true, length = 50)
+    private String boleta;
+
+    // Nuevo campo para los Docentes (opcional)
+    @Column(length = 50)
+    private String numeroEmpleado;
 
     @Column(nullable = false, unique = true, length = 100)
     private String correo;
@@ -31,11 +36,11 @@ public class Usuario {
     private String contrasena;
 
     @Column(length = 50)
-    private String carrera;
+    private String carrera; // Solo para alumnos
 
     @Column(name = "token_password", length = 100)
     private String tokenPassword; // Aquí guardaremos el código temporal
 
     @Column(nullable = false, length = 20)
-    private String rol; // Valores esperados: "PROFESOR" o "ALUMNO"
+    private String rol; // Valores: "ALUMNO", "DOCENTE", "EXTERNO", "ADMIN"
 }

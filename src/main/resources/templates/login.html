@@ -17,15 +17,55 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            overflow: hidden; /* Evita que salga barra de scroll durante la animación */
         }
 
+        /* --- ANIMACIONES SUAVES Y FLUIDAS (Fade & Slide) --- */
+        @keyframes smoothEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(-40px) scale(0.98); /* Entra desde un poco más arriba y ligeramente más chica */
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes smoothExit {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.98); /* Se va hundiendo y desvaneciendo */
+            }
+        }
+
+        /* El contenedor principal de toda la tarjeta */
+        .card-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
+            background-color: #ffffff;
+            /* Animación de entrada fluida de 1 segundo */
+            animation: smoothEnter 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Clase para la salida */
+        .card-wrapper.animating-out {
+            /* Animación de salida fluida */
+            animation: smoothExit 0.8s cubic-bezier(0.32, 0, 0.67, 0) forwards !important;
+        }
+
+        /* Contenedor interno sin animación (para que no haga doble efecto) */
         .container-card {
             display: flex;
             width: 100%;
-            max-width: 1000px;
-            background-color: #ffffff;
+            background-color: transparent;
             border-radius: 12px;
-            box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.5);
             overflow: hidden;
             position: relative;
         }
@@ -189,44 +229,44 @@
 </head>
 <body>
 
-<div class="container-card">
-    <div class="left-content">
-        <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
-        <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
-        <p>Sistema de Gestión de Trabajos Terminales</p>
-    </div>
+<div class="card-wrapper">
+    <div class="container-card">
+        <div class="left-content">
+            <img th:src="@{/imagenes/IPN-Logo.png}" alt="Logo IPN">
+            <h1>INSTITUTO POLITÉCNICO NACIONAL</h1>
+            <p>Sistema de Gestión de Trabajos Terminales</p>
+        </div>
 
-    <div class="form-box">
-        <div class="form-wrapper">
-            <h2 style="text-align: center; color: #6A1C32; margin-bottom: 25px;">Iniciar Sesión</h2>
+        <div class="form-box">
+            <div class="form-wrapper">
+                <h2 style="text-align: center; color: #6A1C32; margin-bottom: 25px;">Iniciar Sesión</h2>
 
-            <form id="formLogin">
-                <div class="form-group">
-                    <label for="correo">Correo Institucional:</label>
-                    <input type="email" id="correo" placeholder="ejemplo@alumno.ipn.mx" required
-                           pattern="^[a-zA-Z0-9._%+-]+@(alumno\.ipn\.mx|ipn\.mx)$"
-                           title="Debe ser un correo institucional con terminación @alumno.ipn.mx o @ipn.mx">
-                </div>
-
-                <div class="form-group">
-                    <label for="contrasena">Contraseña:</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="contrasena" placeholder="Ingresa tu contraseña" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword('contrasena', this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
+                <form id="formLogin">
+                    <div class="form-group">
+                        <label for="correo">Correo Electrónico:</label>
+                        <input type="email" id="correo" placeholder="Ingresa tu correo registrado" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="contrasena">Contraseña:</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="contrasena" placeholder="Ingresa tu contraseña" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('contrasena', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit">Ingresar</button>
+                </form>
+
+                <div class="footer-links">
+                    <a th:href="@{/recuperar}">¿Olvidaste tu contraseña?</a><br>
+                    <span style="color: #666; font-size: 0.9rem;">¿Aún no tienes cuenta? <br> <a th:href="@{/registro}" style="font-size: 1.1rem; color: #4A1322;">Regístrate aquí</a></span>
                 </div>
-
-                <button type="submit">Ingresar</button>
-            </form>
-
-            <div class="footer-links">
-                <a th:href="@{/recuperar}">¿Olvidaste tu contraseña?</a><br>
-                <span>¿Eres alumno y no tienes cuenta? <br> <a th:href="@{/registro}" style="font-size: 1.1rem; color: #4A1322;">Regístrate aquí</a></span>
             </div>
         </div>
     </div>
@@ -249,6 +289,23 @@
             btn.innerHTML = eyeOpen;
         }
     }
+
+    // Transición de salida suave
+    document.querySelectorAll('.footer-links a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const destino = this.href;
+            const cardWrapper = document.querySelector('.card-wrapper');
+
+            // Le agregamos la clase para que se desvanezca
+            cardWrapper.classList.add('animating-out');
+
+            // Esperamos 800ms (lo mismo que dura la animación) y mandamos a la otra página
+            setTimeout(() => {
+                window.location.href = destino;
+            }, 800);
+        });
+    });
 </script>
 </body>
 </html>
